@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0a0a0a;
+  color: #ededed;
+}
+
+@layer components {
+  .step-viewport {
+    @apply flex min-h-screen flex-col px-6 py-12;
+  }
+
+  .card {
+    @apply rounded-xl border-2 border-white/10 bg-surface p-5 transition-all duration-[120ms] hover:border-white/30 cursor-pointer;
+  }
+
+  .card-selected {
+    @apply border-accent bg-accent-dim;
+  }
+
+  .scan-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      #C8E63A 30%,
+      #C8E63A 70%,
+      transparent 100%
+    );
+    box-shadow: 0 0 12px 2px rgba(200, 230, 58, 0.4);
+    animation: scan-line 2s ease-in-out infinite;
+  }
+}
