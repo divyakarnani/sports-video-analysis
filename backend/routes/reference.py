@@ -5,7 +5,8 @@ from fastapi.responses import FileResponse
 
 router = APIRouter()
 
-REFERENCE_DIR = Path(__file__).resolve().parent.parent / "reference_videos"
+_BASE = Path(__file__).resolve().parent.parent
+REFERENCE_DIR = _BASE / "reference_videos" if (_BASE / "reference_videos").is_dir() else _BASE / "backend" / "reference_videos"
 
 MIME_TYPES = {
     ".mp4": "video/mp4",

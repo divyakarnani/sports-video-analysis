@@ -10,7 +10,8 @@ from services.pose_estimator import process_all_pairs
 
 router = APIRouter()
 
-REFERENCE_DIR = Path(__file__).resolve().parent.parent / "reference_videos"
+_BASE = Path(__file__).resolve().parent.parent
+REFERENCE_DIR = _BASE / "reference_videos" if (_BASE / "reference_videos").is_dir() else _BASE / "backend" / "reference_videos"
 
 
 def _find_video(directory: Path, name: str) -> bytes | None:
