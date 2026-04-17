@@ -25,3 +25,21 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(analyze_router)
 app.include_router(reference_router)
+
+
+@app.get("/debug/videos")
+def debug_videos():
+    from pathlib import Path
+    base = Path(__file__).resolve().parent
+    ref_dir = base / "reference_videos"
+    files = []
+    for root, dirs, filenames in os.walk(base):
+        for f in filenames:
+            files.append(os.path.relpath(os.path.join(root, f), base))
+    return {
+        "cwd": os.getcwd(),
+        "base": str(base),
+        "ref_dir": str(ref_dir),
+        "ref_dir_exists": ref_dir.is_dir(),
+        "all_files": sorted(files),
+    }
