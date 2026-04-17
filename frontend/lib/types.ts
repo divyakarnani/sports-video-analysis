@@ -89,6 +89,9 @@ export interface CameraAngle {
   sport: Sport;
 }
 
+/** sport → shot_type → angle → video_id[] */
+export type VideoAvailability = Record<string, Record<string, Record<string, string[]>>>;
+
 export type WizardStep = "sport" | "category" | "variant" | "camera" | "pro";
 
 export interface WizardSelections {

@@ -1,6 +1,7 @@
 "use client";
 
-import { Sport, ShotTypeId, CameraAngleId, CameraAngle } from "@/lib/types";
+import { Sport, ShotTypeId, CameraAngleId, CameraAngle, VideoAvailability } from "@/lib/types";
+import { isAngleAvailable } from "@/lib/availability";
 import { getCameraAnglesForSport } from "@/lib/cameraAngles";
 import { getShotTypeById } from "@/lib/shotTypes";
 import StepLayout from "./StepLayout";
@@ -16,6 +17,7 @@ interface CameraAngleStepProps {
   categoryId: ShotTypeId;
   variantLabel: string | null;
   selected: CameraAngleId | null;
+  availability: VideoAvailability | null;
   onSelect: (id: CameraAngleId) => void;
   onContinue: () => void;
   onBack: () => void;
@@ -27,6 +29,7 @@ export default function CameraAngleStep({
   categoryId,
   variantLabel,
   selected,
+  availability,
   onSelect,
   onContinue,
   onBack,
@@ -52,28 +55,38 @@ export default function CameraAngleStep({
       direction={direction}
     >
       <div className="grid grid-cols-2 gap-4">
-        {angles.map((angle) => (
-          <button
-            key={angle.id}
-            onClick={() => onSelect(angle.id)}
-            className={`card text-left ${
-              selected === angle.id ? "card-selected" : ""
-            }`}
-          >
-            <div className="font-display text-lg font-bold">{angle.label}</div>
-            <p className="mt-1 text-sm text-white/50">{angle.description}</p>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {angle.bestFor.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-accent-dim px-2.5 py-0.5 text-xs font-medium text-accent"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </button>
-        ))}
+        {angles.map((angle) => {
+          const available = isAngleAvailable(availability, sport, categoryId, angle.id);
+          return (
+            <button
+              key={angle.id}
+              onClick={() => available && onSelect(angle.id)}
+              className={`card text-left ${
+                selected === angle.id ? "card-selected" : ""
+              } ${!available ? "card-disabled" : ""}`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-display text-lg font-bold">{angle.label}</span>
+                {!available && (
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/40">
+                    Coming soon
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-sm text-white/50">{angle.description}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {angle.bestFor.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-accent-dim px-2.5 py-0.5 text-xs font-medium text-accent"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </button>
+          );
+        })}
       </div>
     </StepLayout>
   );

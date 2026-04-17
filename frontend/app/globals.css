@@ -20,6 +20,10 @@ body {
     @apply border-accent bg-accent-dim;
   }
 
+  .card-disabled {
+    @apply opacity-40 cursor-not-allowed hover:border-white/10;
+  }
+
   .scan-line {
     position: absolute;
     left: 0;

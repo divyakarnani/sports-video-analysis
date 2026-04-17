@@ -1,6 +1,16 @@
-import { AnalysisResult, PoseFramePair } from "./types";
+import { AnalysisResult, PoseFramePair, VideoAvailability } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+export async function fetchAvailability(): Promise<VideoAvailability> {
+  try {
+    const res = await fetch(`${API_URL}/reference-availability`);
+    if (!res.ok) return {};
+    return await res.json();
+  } catch {
+    return {};
+  }
+}
 
 export async function analyzeVideo(
   file: File,

@@ -1,6 +1,7 @@
 "use client";
 
-import { Sport, ShotTypeId, ShotTypeVariant } from "@/lib/types";
+import { Sport, ShotTypeId, ShotTypeVariant, VideoAvailability } from "@/lib/types";
+import { isVariantAvailable } from "@/lib/availability";
 import { getShotTypeById } from "@/lib/shotTypes";
 import StepLayout from "./StepLayout";
 
@@ -14,6 +15,7 @@ interface VariantStepProps {
   sport: Sport;
   categoryId: ShotTypeId;
   selected: string | null;
+  availability: VideoAvailability | null;
   onSelect: (variantId: string) => void;
   onContinue: () => void;
   onBack: () => void;
@@ -24,6 +26,7 @@ export default function VariantStep({
   sport,
   categoryId,
   selected,
+  availability,
   onSelect,
   onContinue,
   onBack,
@@ -46,17 +49,27 @@ export default function VariantStep({
       direction={direction}
     >
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {variants.map((v) => (
-          <button
-            key={v.id}
-            onClick={() => onSelect(v.id)}
-            className={`card text-center ${
-              selected === v.id ? "card-selected" : ""
-            }`}
-          >
-            <div className="font-display text-lg font-bold">{v.label}</div>
-          </button>
-        ))}
+        {variants.map((v) => {
+          const available = isVariantAvailable(availability, sport, categoryId, v.id);
+          return (
+            <button
+              key={v.id}
+              onClick={() => available && onSelect(v.id)}
+              className={`card text-center ${
+                selected === v.id ? "card-selected" : ""
+              } ${!available ? "card-disabled" : ""}`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <span className="font-display text-lg font-bold">{v.label}</span>
+                {!available && (
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/40">
+                    Coming soon
+                  </span>
+                )}
+              </div>
+            </button>
+          );
+        })}
       </div>
     </StepLayout>
   );

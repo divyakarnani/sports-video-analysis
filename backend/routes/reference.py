@@ -23,6 +23,22 @@ def _find_video(directory: Path, name: str) -> tuple[Path, str] | None:
     return None
 
 
+@router.get("/reference-availability")
+async def reference_availability():
+    """Return a nested dict of all available reference videos."""
+    tree: dict = {}
+    for path in REFERENCE_DIR.rglob("*"):
+        if path.suffix.lower() not in MIME_TYPES or not path.is_file():
+            continue
+        parts = path.relative_to(REFERENCE_DIR).parts  # (sport, shot_type, angle, file)
+        if len(parts) != 4:
+            continue
+        sport, shot_type, angle, filename = parts
+        video_id = path.stem
+        tree.setdefault(sport, {}).setdefault(shot_type, {}).setdefault(angle, []).append(video_id)
+    return tree
+
+
 @router.get("/reference-video/{sport}/{shot_type}/{angle}/{video_id}")
 async def get_reference_video(sport: str, shot_type: str, angle: str, video_id: str):
     """Serve a reference video file.

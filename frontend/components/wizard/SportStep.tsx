@@ -1,6 +1,7 @@
 "use client";
 
-import { Sport } from "@/lib/types";
+import { Sport, VideoAvailability } from "@/lib/types";
+import { isSportAvailable } from "@/lib/availability";
 import StepLayout from "./StepLayout";
 
 const SPORTS: { id: Sport; label: string; description: string }[] = [
@@ -11,6 +12,7 @@ const SPORTS: { id: Sport; label: string; description: string }[] = [
 
 interface SportStepProps {
   selected: Sport | null;
+  availability: VideoAvailability | null;
   onSelect: (sport: Sport) => void;
   onContinue: () => void;
   direction: "left" | "right";
@@ -18,6 +20,7 @@ interface SportStepProps {
 
 export default function SportStep({
   selected,
+  availability,
   onSelect,
   onContinue,
   direction,
@@ -32,18 +35,28 @@ export default function SportStep({
       direction={direction}
     >
       <div className="grid grid-cols-3 gap-4">
-        {SPORTS.map((sport) => (
-          <button
-            key={sport.id}
-            onClick={() => onSelect(sport.id)}
-            className={`card text-left ${
-              selected === sport.id ? "card-selected" : ""
-            }`}
-          >
-            <div className="font-display text-lg font-bold">{sport.label}</div>
-            <p className="mt-1 text-sm text-white/50">{sport.description}</p>
-          </button>
-        ))}
+        {SPORTS.map((sport) => {
+          const available = isSportAvailable(availability, sport.id);
+          return (
+            <button
+              key={sport.id}
+              onClick={() => available && onSelect(sport.id)}
+              className={`card text-left ${
+                selected === sport.id ? "card-selected" : ""
+              } ${!available ? "card-disabled" : ""}`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-display text-lg font-bold">{sport.label}</span>
+                {!available && (
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/40">
+                    Coming soon
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-sm text-white/50">{sport.description}</p>
+            </button>
+          );
+        })}
       </div>
     </StepLayout>
   );

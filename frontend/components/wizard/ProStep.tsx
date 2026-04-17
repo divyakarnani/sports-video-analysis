@@ -1,6 +1,7 @@
 "use client";
 
-import { Sport, ShotTypeId, CameraAngleId, Pro } from "@/lib/types";
+import { Sport, ShotTypeId, CameraAngleId, Pro, VideoAvailability } from "@/lib/types";
+import { isProAvailable } from "@/lib/availability";
 import { getProsForShotType } from "@/lib/pros";
 import { getShotTypeById } from "@/lib/shotTypes";
 import StepLayout from "./StepLayout";
@@ -19,6 +20,7 @@ interface ProStepProps {
   cameraAngleId: CameraAngleId | null;
   cameraLabel: string | null;
   selected: Pro | null;
+  availability: VideoAvailability | null;
   onSelect: (pro: Pro) => void;
   onContinue: () => void;
   onBack: () => void;
@@ -33,6 +35,7 @@ export default function ProStep({
   cameraAngleId,
   cameraLabel,
   selected,
+  availability,
   onSelect,
   onContinue,
   onBack,
@@ -66,42 +69,52 @@ export default function ProStep({
         </div>
       ) : (
         <div className="space-y-3">
-          {pros.map((pro) => (
-            <button
-              key={pro.id}
-              onClick={() => onSelect(pro)}
-              className={`card flex w-full items-center gap-4 text-left ${
-                selected?.id === pro.id ? "card-selected" : ""
-              }`}
-            >
-              {/* Avatar */}
-              <div
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold text-black"
-                style={{ backgroundColor: pro.avatarColor ?? "#888" }}
+          {pros.map((pro) => {
+            const available = isProAvailable(availability, sport, categoryId, cameraAngleId, pro.id);
+            return (
+              <button
+                key={pro.id}
+                onClick={() => available && onSelect(pro)}
+                className={`card flex w-full items-center gap-4 text-left ${
+                  selected?.id === pro.id ? "card-selected" : ""
+                } ${!available ? "card-disabled" : ""}`}
               >
-                {pro.initials}
-              </div>
-
-              {/* Info */}
-              <div className="min-w-0 flex-1">
-                <div className="font-display text-base font-bold">
-                  {pro.name}
+                {/* Avatar */}
+                <div
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold text-black"
+                  style={{ backgroundColor: pro.avatarColor ?? "#888" }}
+                >
+                  {pro.initials}
                 </div>
-                <div className="text-sm text-white/50">{pro.subtitle}</div>
-                {pro.bestFor && (
-                  <div className="mt-0.5 text-xs text-accent">{pro.bestFor}</div>
+
+                {/* Info */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-display text-base font-bold">
+                      {pro.name}
+                    </span>
+                    {!available && (
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/40">
+                        Coming soon
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-sm text-white/50">{pro.subtitle}</div>
+                  {pro.bestFor && (
+                    <div className="mt-0.5 text-xs text-accent">{pro.bestFor}</div>
+                  )}
+                </div>
+
+                {/* Footage indicator */}
+                {available && (
+                  <div className="flex shrink-0 items-center gap-1.5 text-xs text-white/40">
+                    <span className="inline-block h-2 w-2 rounded-full bg-green-400" />
+                    Footage
+                  </div>
                 )}
-              </div>
-
-              {/* Footage indicator */}
-              {pro.hasFootage && (
-                <div className="flex shrink-0 items-center gap-1.5 text-xs text-white/40">
-                  <span className="inline-block h-2 w-2 rounded-full bg-green-400" />
-                  Footage
-                </div>
-              )}
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
     </StepLayout>

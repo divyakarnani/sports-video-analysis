@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sport, ShotTypeId, CameraAngleId, Pro, WizardStep, WizardSelections } from "@/lib/types";
+import { Sport, ShotTypeId, CameraAngleId, Pro, WizardStep, WizardSelections, VideoAvailability } from "@/lib/types";
+import { fetchAvailability } from "@/lib/api";
 import { getShotTypeById } from "@/lib/shotTypes";
 import { getCameraAnglesForSport } from "@/lib/cameraAngles";
 import SportStep from "@/components/wizard/SportStep";
@@ -27,6 +28,11 @@ export default function Home() {
 
   const [currentStep, setCurrentStep] = useState<WizardStep>("sport");
   const [direction, setDirection] = useState<"left" | "right">("left");
+  const [availability, setAvailability] = useState<VideoAvailability | null>(null);
+
+  useEffect(() => {
+    fetchAvailability().then(setAvailability);
+  }, []);
 
   const hasPro = selections.sport ? PRO_SPORTS.includes(selections.sport) : false;
 
@@ -93,6 +99,7 @@ export default function Home() {
       return (
         <SportStep
           selected={selections.sport}
+          availability={availability}
           onSelect={(sport) =>
             setSelections((s) => ({
               ...s,
@@ -115,6 +122,7 @@ export default function Home() {
         <CategoryStep
           sport={selections.sport!}
           selected={selections.category}
+          availability={availability}
           onSelect={(id) =>
             setSelections((s) => ({
               ...s,
@@ -138,6 +146,7 @@ export default function Home() {
           sport={selections.sport!}
           categoryId={selections.category!}
           selected={selections.variant}
+          availability={availability}
           onSelect={(variantId) =>
             setSelections((s) => ({
               ...s,
@@ -160,6 +169,7 @@ export default function Home() {
           categoryId={selections.category!}
           variantLabel={variantLabel}
           selected={selections.cameraAngle}
+          availability={availability}
           onSelect={(id) =>
             setSelections((s) => ({
               ...s,
@@ -183,6 +193,7 @@ export default function Home() {
           cameraAngleId={selections.cameraAngle}
           cameraLabel={cameraLabel}
           selected={selections.pro}
+          availability={availability}
           onSelect={(pro) => setSelections((s) => ({ ...s, pro }))}
           onContinue={handleLastStepContinue}
           onBack={goBack}
