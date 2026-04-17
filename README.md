@@ -155,11 +155,7 @@ Railway runs both services as Docker containers in a single project. You'll crea
    ```
 5. Go to **Settings** → **Networking** → **Generate Domain** to get a public URL (e.g. `formcheck-backend-production.up.railway.app`)
 
-> **Note on reference videos:** The reference `.mp4` files are gitignored. You'll need to either:
-> - Add them to the Docker image by removing the gitignore exclusion, or
-> - Upload them to a cloud bucket (S3/R2) and update the reference route to fetch from there
-
-> **Note on MediaPipe model:** Download `pose_landmarker_heavy.task` and place it in `backend/models/` before deploying. Either commit the model file or add a download step to the Dockerfile.
+> **Note:** Reference videos and the MediaPipe model are committed to the repo and will be included in the Docker image automatically.
 
 ### Step 3: Create the frontend service
 
