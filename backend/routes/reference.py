@@ -5,8 +5,24 @@ from fastapi.responses import FileResponse
 
 router = APIRouter()
 
-_BASE = Path(__file__).resolve().parent.parent
-REFERENCE_DIR = _BASE / "reference_videos" if (_BASE / "reference_videos").is_dir() else _BASE / "backend" / "reference_videos"
+# __file__ is .../routes/reference.py, so parent.parent is the backend root
+# (e.g. /app/ when built with rootDirectory=/backend, or /app/backend/ in other layouts).
+# We search candidate locations in order and use the first one that exists at
+# request time, so the resolution is never frozen to a wrong path at import time.
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent
+_CANDIDATE_DIRS = [
+    _BACKEND_ROOT / "reference_videos",           # /app/reference_videos  (rootDirectory=/backend)
+    _BACKEND_ROOT / "backend" / "reference_videos",  # /app/backend/reference_videos  (no rootDirectory)
+]
+
+
+def _get_reference_dir() -> Path:
+    """Return the first candidate reference_videos directory that exists."""
+    for candidate in _CANDIDATE_DIRS:
+        if candidate.is_dir():
+            return candidate
+    # Fall back to the primary candidate so callers get a meaningful path in errors
+    return _CANDIDATE_DIRS[0]
 
 MIME_TYPES = {
     ".mp4": "video/mp4",
@@ -27,11 +43,12 @@ def _find_video(directory: Path, name: str) -> tuple[Path, str] | None:
 @router.get("/reference-availability")
 async def reference_availability():
     """Return a nested dict of all available reference videos."""
+    reference_dir = _get_reference_dir()
     tree: dict = {}
-    for path in REFERENCE_DIR.rglob("*"):
+    for path in reference_dir.rglob("*"):
         if path.suffix.lower() not in MIME_TYPES or not path.is_file():
             continue
-        parts = path.relative_to(REFERENCE_DIR).parts  # (sport, shot_type, angle, file)
+        parts = path.relative_to(reference_dir).parts  # (sport, shot_type, angle, file)
         if len(parts) != 4:
             continue
         sport, shot_type, angle, filename = parts
@@ -47,7 +64,8 @@ async def get_reference_video(sport: str, shot_type: str, angle: str, video_id: 
     For tennis: video_id is a pro_id (e.g. 'swiatek')
     For dance/skating: video_id is a variant (e.g. 'pirouette') or 'reference'
     """
-    nested_dir = REFERENCE_DIR / sport / shot_type
+    reference_dir = _get_reference_dir()
+    nested_dir = reference_dir / sport / shot_type
 
     # 1. Angle-aware: {sport}/{shot_type}/{angle}/{video_id}
     result = _find_video(nested_dir / angle, video_id)
