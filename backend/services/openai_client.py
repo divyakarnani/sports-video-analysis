@@ -11,7 +11,7 @@ _client: AsyncOpenAI | None = None
 def _get_client() -> AsyncOpenAI:
     global _client
     if _client is None:
-        _client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        _client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY", "").strip())
     return _client
 
 
