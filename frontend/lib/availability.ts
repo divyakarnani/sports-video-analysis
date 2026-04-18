@@ -38,10 +38,7 @@ export function isVariantAvailable(
   a: A,
   sport: string,
   shotType: string,
-  variantId: string,
 ): boolean {
   if (!a) return true;
-  const shotData = a[sport]?.[shotType];
-  if (!shotData) return false;
-  return Object.values(shotData).some((ids) => ids.includes(variantId));
+  return !!a[sport]?.[shotType];
 }

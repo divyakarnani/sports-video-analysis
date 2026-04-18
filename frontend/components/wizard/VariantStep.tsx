@@ -50,7 +50,7 @@ export default function VariantStep({
     >
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {variants.map((v) => {
-          const available = isVariantAvailable(availability, sport, categoryId, v.id);
+          const available = isVariantAvailable(availability, sport, categoryId);
           return (
             <button
               key={v.id}
